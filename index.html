@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Current Tasks</title>
+    <title>College Task Archive</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,9 +12,36 @@
 <body>
     <div class="container">
         <header>
-            <h1>My Current Tasks</h1>
-            <p class="subtitle">Things I'm working on right now</p>
+            <h1>College Task Archive</h1>
+            <p class="subtitle">Previous Coursework and Assignments</p>
         </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="course-filter">Filter by Course:</label>
+                <select id="course-filter">
+                    <option value="all">All Courses</option>
+                    <option value="CISP 400">CISP 400</option>
+                    <option value="CISP 430">CISP 430</option>
+                    <option value="CISS 315">CISS 315</option>
+                    <option value="CISS 316">CISS 316</option>
+                    <option value="CISS 321">CISS 321</option>
+                    <option value="CISS 353">CISS 353</option>
+                    <option value="CISS 360">CISS 360</option>
+                    <option value="CISC 360">CISC 360</option>
+                    <option value="MATH 372">MATH 372</option>
+                    <option value="misc">Miscellaneous</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="status-filter">Filter by Status:</label>
+                <select id="status-filter">
+                    <option value="all">All Tasks</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+        </div>
 
         <main>
             <div class="task-container">
