@@ -8,6 +8,26 @@
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --border-radius: 12px;
     --spacing: 1.5rem;
+    
+    /* Category colors */
+    --math-color: #8b5cf6;
+    --cisp-430-color: #ec4899;
+    --ciss-316-color: #14b8a6;
+    --cisc-360-color: #f59e0b;
+    --misc-color: #6b7280;
+    
+    /* Priority colors */
+    --high-bg: #fee2e2;
+    --high-text: #b91c1c;
+    --medium-bg: #fef3c7;
+    --medium-text: #b45309;
+    --low-bg: #dcfce7;
+    --low-text: #166534;
+    
+    /* Status colors */
+    --overdue-color: #ef4444;
+    --due-today-color: #f97316;
+    --due-soon-color: #f59e0b;
 }
 
 * {
@@ -24,14 +44,14 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
 header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
 }
 
 h1 {
@@ -49,12 +69,51 @@ h1 {
     font-size: 1.1rem;
 }
 
+/* Category filters */
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.category-btn {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border: 1px solid var(--text-light);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-btn:hover {
+    background-color: #f1f5f9;
+}
+
+.category-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Tasks container */
 .task-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--spacing);
 }
 
+.no-tasks {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+/* Task cards */
 .task-card {
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
@@ -63,6 +122,8 @@ h1 {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
+    position: relative;
+    border-top: 4px solid var(--primary-color);
 }
 
 .task-card:hover {
@@ -70,8 +131,40 @@ h1 {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Category styling */
+.category-label {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.category-math {
+    border-top-color: var(--math-color);
+}
+
+.category-cisp-430 {
+    border-top-color: var(--cisp-430-color);
+}
+
+.category-ciss-316 {
+    border-top-color: var(--ciss-316-color);
+}
+
+.category-cisc-360 {
+    border-top-color: var(--cisc-360-color);
+}
+
+.category-misc {
+    border-top-color: var(--misc-color);
+}
+
+/* Task elements */
 .task-title {
     margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
     font-size: 1.25rem;
     color: var(--text-color);
     font-weight: 600;
@@ -88,9 +181,16 @@ h1 {
     justify-content: space-between;
     align-items: center;
     font-size: 0.875rem;
-    color: var(--text-light);
+    margin-bottom: 0.5rem;
 }
 
+.task-date {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    align-self: flex-end;
+}
+
+/* Priority styling */
 .task-priority {
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
@@ -100,20 +200,37 @@ h1 {
 }
 
 .priority-high {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background-color: var(--high-bg);
+    color: var(--high-text);
 }
 
 .priority-medium {
-    background-color: #fef3c7;
-    color: #b45309;
+    background-color: var(--medium-bg);
+    color: var(--medium-text);
 }
 
 .priority-low {
-    background-color: #dcfce7;
-    color: #166534;
+    background-color: var(--low-bg);
+    color: var(--low-text);
 }
 
+/* Status styling */
+.overdue {
+    color: var(--overdue-color);
+    font-weight: 600;
+}
+
+.due-today {
+    color: var(--due-today-color);
+    font-weight: 600;
+}
+
+.due-soon {
+    color: var(--due-soon-color);
+    font-weight: 600;
+}
+
+/* Footer */
 footer {
     margin-top: 3rem;
     text-align: center;
@@ -121,7 +238,8 @@ footer {
     font-size: 0.875rem;
 }
 
-@media (max-width: 600px) {
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .task-container {
         grid-template-columns: 1fr;
     }
@@ -132,5 +250,12 @@ footer {
     
     h1 {
         font-size: 2rem;
+    }
+    
+    .category-filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        justify-content: flex-start;
     }
 }

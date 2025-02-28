@@ -156,3 +156,5 @@ const tasks = [
         status: "pending"
     }
 ];
+
+// You can add more tasks by following the same format
