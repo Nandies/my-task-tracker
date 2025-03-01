@@ -30,6 +30,105 @@ function getRelativeTimeDescription(dateString) {
     }
 }
 
+// ------ AUTHENTICATION FUNCTIONALITY ------
+
+// Variable to track authentication state
+let isAuthenticated = false;
+
+// Function to check if password is set
+function isPasswordSet() {
+    return localStorage.getItem('taskPassword') !== null;
+}
+
+// Function to hash a password (for simple protection, not truly secure)
+function hashPassword(password) {
+    // This is a simple hash function, not secure for production
+    let hash = 0;
+    for (let i = 0; i < password.length; i++) {
+        const char = password.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash.toString();
+}
+
+// Function to set up password
+function setupPassword(password) {
+    const hashedPassword = hashPassword(password);
+    localStorage.setItem('taskPassword', hashedPassword);
+    alert('Password set successfully. You will need this password to mark tasks as complete.');
+    hidePasswordDialog();
+}
+
+// Function to verify password
+function verifyPassword(password) {
+    const storedHash = localStorage.getItem('taskPassword');
+    const inputHash = hashPassword(password);
+    
+    if (storedHash === inputHash) {
+        isAuthenticated = true;
+        hidePasswordDialog();
+        
+        // Authorize for a session (until page refresh)
+        sessionStorage.setItem('isAuthenticated', 'true');
+        
+        // Enable all complete buttons
+        document.querySelectorAll('.complete-btn').forEach(btn => {
+            btn.disabled = false;
+        });
+        
+        return true;
+    } else {
+        alert('Incorrect password. Please try again.');
+        return false;
+    }
+}
+
+// Function to show password dialog
+function showPasswordDialog(action) {
+    const passwordDialog = document.getElementById('password-dialog');
+    const setupForm = document.getElementById('password-setup-form');
+    const verifyForm = document.getElementById('password-verify-form');
+    
+    passwordDialog.classList.remove('hidden');
+    
+    if (action === 'setup') {
+        setupForm.classList.remove('hidden');
+        verifyForm.classList.add('hidden');
+    } else if (action === 'verify') {
+        setupForm.classList.add('hidden');
+        verifyForm.classList.remove('hidden');
+    }
+}
+
+// Function to hide password dialog
+function hidePasswordDialog() {
+    const passwordDialog = document.getElementById('password-dialog');
+    passwordDialog.classList.add('hidden');
+}
+
+// Function to handle task completion attempt
+function handleTaskCompletionAttempt(taskId) {
+    // If already authenticated, proceed
+    if (isAuthenticated) {
+        toggleTaskCompletion(taskId);
+        return;
+    }
+    
+    // Check if password is set
+    if (!isPasswordSet()) {
+        showPasswordDialog('setup');
+        
+        // Store the task ID for later use
+        document.getElementById('password-setup-form').dataset.taskId = taskId;
+    } else {
+        showPasswordDialog('verify');
+        
+        // Store the task ID for later use
+        document.getElementById('password-verify-form').dataset.taskId = taskId;
+    }
+}
+
 // Function to render categories
 function renderCategories() {
     const categoryContainer = document.getElementById('category-filters');
@@ -291,7 +390,7 @@ function toggleArchive() {
 // Function to toggle task completion
 function toggleTaskCompletion(taskId) {
     // Find the task by ID
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find(t => t.id === parseInt(taskId));
     
     if (task) {
         // Toggle the status
@@ -363,7 +462,7 @@ function renderTasks(categoryFilter = 'All') {
                 <span class="task-deadline">${getRelativeTimeDescription(task.deadline)}</span>
             </div>
             <div class="task-date">${formatDate(task.deadline)}</div>
-            <button class="complete-btn" data-task-id="${task.id}">Mark Complete</button>
+            <button class="complete-btn" data-task-id="${task.id}" ${isAuthenticated ? '' : 'disabled'}>Mark Complete</button>
         `;
         
         taskContainer.appendChild(taskCard);
@@ -372,8 +471,8 @@ function renderTasks(categoryFilter = 'All') {
     // Add event listeners to complete buttons
     document.querySelectorAll('.complete-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const taskId = parseInt(e.target.dataset.taskId);
-            toggleTaskCompletion(taskId);
+            const taskId = e.target.dataset.taskId;
+            handleTaskCompletionAttempt(taskId);
         });
     });
 }
@@ -421,7 +520,7 @@ function renderArchive() {
             <h3 class="task-title">${task.title}</h3>
             <p class="task-description">${task.description}</p>
             <div class="task-date">Completed</div>
-            <button class="restore-btn" data-task-id="${task.id}">Restore Task</button>
+            <button class="restore-btn" data-task-id="${task.id}" ${isAuthenticated ? '' : 'disabled'}>Restore Task</button>
         `;
         
         archiveContainer.appendChild(taskCard);
@@ -430,8 +529,8 @@ function renderArchive() {
     // Add event listeners to restore buttons
     document.querySelectorAll('.restore-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const taskId = parseInt(e.target.dataset.taskId);
-            toggleTaskCompletion(taskId);
+            const taskId = e.target.dataset.taskId;
+            handleTaskCompletionAttempt(taskId);
         });
     });
     
@@ -450,6 +549,9 @@ function updateTimestamp() {
 
 // Initialize the application
 function init() {
+    // Check if session is authenticated
+    isAuthenticated = sessionStorage.getItem('isAuthenticated') === 'true';
+    
     // Load tasks from localStorage
     loadTasks();
     
@@ -492,6 +594,68 @@ function init() {
     const cancelNoteBtn = document.getElementById('cancel-note');
     if (cancelNoteBtn) {
         cancelNoteBtn.addEventListener('click', cancelNoteEdit);
+    }
+    
+    // Set up event listeners for password dialogs
+    const setupPasswordForm = document.getElementById('password-setup-form');
+    const verifyPasswordForm = document.getElementById('password-verify-form');
+    
+    if (setupPasswordForm) {
+        setupPasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const passwordInput = document.getElementById('setup-password-input');
+            const password = passwordInput.value.trim();
+            
+            if (password.length < 4) {
+                alert('Password must be at least 4 characters.');
+                return;
+            }
+            
+            setupPassword(password);
+            
+            // Get the task ID and complete it
+            const taskId = this.dataset.taskId;
+            if (taskId) {
+                isAuthenticated = true;
+                toggleTaskCompletion(taskId);
+            }
+            
+            // Clear the input
+            passwordInput.value = '';
+        });
+    }
+    
+    if (verifyPasswordForm) {
+        verifyPasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const passwordInput = document.getElementById('verify-password-input');
+            const password = passwordInput.value.trim();
+            
+            const isValid = verifyPassword(password);
+            
+            if (isValid) {
+                // Get the task ID and complete it
+                const taskId = this.dataset.taskId;
+                if (taskId) {
+                    toggleTaskCompletion(taskId);
+                }
+            }
+            
+            // Clear the input
+            passwordInput.value = '';
+        });
+    }
+    
+    // Cancel buttons for password dialogs
+    const setupCancelBtn = document.getElementById('setup-cancel');
+    const verifyCancelBtn = document.getElementById('verify-cancel');
+    
+    if (setupCancelBtn) {
+        setupCancelBtn.addEventListener('click', hidePasswordDialog);
+    }
+    
+    if (verifyCancelBtn) {
+        verifyCancelBtn.addEventListener('click', hidePasswordDialog);
     }
     
     // Render the UI
