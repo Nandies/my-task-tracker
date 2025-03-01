@@ -136,7 +136,28 @@ const tasks = [
         deadline: "2025-12-27T16:00:00",
         category: "Misc",
         status: "pending"
-    }
+    },
+    {
+        id: 15,
+        title: "Apply for Graduation on losrios",
+        description: "Apply for graduation thing get this done before March 7",
+        priority: "high",
+        deadline: "2025-03-06",
+        category: "Misc",
+        status: "pending"
+    },
+    {
+        id: 16,
+        title: "Complete California State Job stuff",
+        description: "Complete everything in notes for apply for state due before end of March",
+        priority: "high",
+        deadline: "2025-03-30",
+        category: "Misc",
+        status: "pending"
+    },
+    
+    
+
 ];
 
 // You can add more tasks by following the same format

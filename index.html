@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Current Academic Tasks</title>
+    <title>My Academic Tasks</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>My Current Academic Tasks</h1>
+            <h1>My Academic Tasks</h1>
             <p class="subtitle">Assignments and deadlines I'm working on</p>
         </header>
 
@@ -21,8 +21,22 @@
         </div>
 
         <main>
+            <h2 class="section-title">Active Tasks</h2>
             <div class="task-container">
                 <!-- Tasks will be loaded here from tasks.js -->
+            </div>
+            
+            <div class="archive-toggle-container">
+                <button id="archive-toggle" class="archive-toggle">
+                    Show Completed Tasks <span id="archive-counter" class="archive-counter">0</span>
+                </button>
+            </div>
+            
+            <div id="archive-section" class="archive-section hidden">
+                <h2 class="section-title">Completed Tasks</h2>
+                <div class="archive-container">
+                    <!-- Completed tasks will be loaded here -->
+                </div>
             </div>
         </main>
 

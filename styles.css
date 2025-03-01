@@ -28,6 +28,15 @@
     --overdue-color: #ef4444;
     --due-today-color: #f97316;
     --due-soon-color: #f59e0b;
+    
+    /* Button colors */
+    --button-bg: #f1f5f9;
+    --button-hover: #e2e8f0;
+    --button-text: #475569;
+    --complete-button-bg: #dcfce7;
+    --complete-button-text: #166534;
+    --restore-button-bg: #dbeafe;
+    --restore-button-text: #1e40af;
 }
 
 * {
@@ -69,6 +78,16 @@ h1 {
     font-size: 1.1rem;
 }
 
+/* Section titles */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
 /* Category filters */
 .category-filters {
     display: flex;
@@ -99,10 +118,11 @@ h1 {
 }
 
 /* Tasks container */
-.task-container {
+.task-container, .archive-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--spacing);
+    margin-bottom: 2rem;
 }
 
 .no-tasks {
@@ -129,6 +149,24 @@ h1 {
 .task-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Archived task styling */
+.task-card.archived {
+    opacity: 0.85;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+    border-top-width: 4px;
+}
+
+.task-card.archived:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.task-card.archived .task-title {
+    text-decoration: line-through;
+    color: var(--text-light);
 }
 
 /* Category styling */
@@ -188,6 +226,7 @@ h1 {
     font-size: 0.75rem;
     color: var(--text-light);
     align-self: flex-end;
+    margin-bottom: 1rem;
 }
 
 /* Priority styling */
@@ -230,6 +269,80 @@ h1 {
     font-weight: 600;
 }
 
+/* Complete/Restore buttons */
+.complete-btn, .restore-btn {
+    padding: 0.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.complete-btn {
+    background-color: var(--complete-button-bg);
+    color: var(--complete-button-text);
+}
+
+.complete-btn:hover {
+    background-color: #86efac;
+}
+
+.restore-btn {
+    background-color: var(--restore-button-bg);
+    color: var(--restore-button-text);
+}
+
+.restore-btn:hover {
+    background-color: #93c5fd;
+}
+
+/* Archive section */
+.archive-section {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #cbd5e1;
+}
+
+.archive-section.hidden {
+    display: none;
+}
+
+.archive-toggle-container {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.archive-toggle {
+    padding: 0.5rem 1rem;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.archive-toggle:hover {
+    background-color: var(--button-hover);
+}
+
+.archive-counter {
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    display: inline-block;
+}
+
 /* Footer */
 footer {
     margin-top: 3rem;
@@ -240,7 +353,7 @@ footer {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .task-container {
+    .task-container, .archive-container {
         grid-template-columns: 1fr;
     }
     
