@@ -11,10 +11,39 @@
 </head>
 <body>
     <div class="container">
+        <div class="top-bar">
+            <button id="notes-toggle" class="notes-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span>Notes</span>
+            </button>
+        </div>
+        
         <header>
             <h1>My Academic Tasks</h1>
             <p class="subtitle">Assignments and deadlines I'm working on</p>
         </header>
+
+        <!-- Notes Panel -->
+        <div id="notes-panel" class="notes-panel hidden">
+            <div class="notes-header">
+                <h2>My Notes</h2>
+                <button id="add-note" class="add-note-btn">+ New Note</button>
+            </div>
+            <div id="notes-container" class="notes-container">
+                <!-- Notes will be loaded here -->
+            </div>
+            <div id="note-editor" class="note-editor hidden">
+                <input type="text" id="note-title" class="note-title-input" placeholder="Note Title">
+                <textarea id="note-content" class="note-content-input" placeholder="Write your note here..."></textarea>
+                <div class="note-actions">
+                    <button id="save-note" class="save-note-btn">Save Note</button>
+                    <button id="cancel-note" class="cancel-note-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
 
         <div id="category-filters" class="category-filters">
             <!-- Category buttons will be added here via JavaScript -->

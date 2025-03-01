@@ -66,6 +66,193 @@ function renderCategories() {
     });
 }
 
+// ------ NOTES FUNCTIONALITY ------
+
+// Array to store notes
+let notes = [];
+
+// Function to toggle notes panel
+function toggleNotesPanel() {
+    const notesPanel = document.getElementById('notes-panel');
+    notesPanel.classList.toggle('hidden');
+}
+
+// Function to save notes to localStorage
+function saveNotes() {
+    localStorage.setItem('notes', JSON.stringify(notes));
+}
+
+// Function to load notes from localStorage
+function loadNotes() {
+    const savedNotes = localStorage.getItem('notes');
+    if (savedNotes) {
+        notes = JSON.parse(savedNotes);
+    }
+}
+
+// Function to render notes
+function renderNotes() {
+    const notesContainer = document.getElementById('notes-container');
+    
+    // Clear existing notes
+    notesContainer.innerHTML = '';
+    
+    // Check if we have any notes
+    if (notes.length === 0) {
+        notesContainer.innerHTML = `
+            <div class="no-notes">
+                <p>No notes yet. Click "New Note" to create one.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort notes by last modified date (newest first)
+    const sortedNotes = [...notes].sort((a, b) => {
+        return new Date(b.lastModified) - new Date(a.lastModified);
+    });
+    
+    // Create note cards
+    sortedNotes.forEach(note => {
+        const noteCard = document.createElement('div');
+        noteCard.className = 'note-card';
+        noteCard.dataset.noteId = note.id;
+        
+        // Create a preview of the content (first 100 characters)
+        const contentPreview = note.content.length > 100 
+            ? note.content.substring(0, 100) + '...' 
+            : note.content;
+        
+        noteCard.innerHTML = `
+            <h3 class="note-card-title">${note.title}</h3>
+            <p class="note-card-preview">${contentPreview}</p>
+            <div class="note-card-actions">
+                <button class="edit-note-btn" data-note-id="${note.id}">Edit</button>
+                <button class="delete-note-btn" data-note-id="${note.id}">Delete</button>
+            </div>
+        `;
+        
+        notesContainer.appendChild(noteCard);
+    });
+    
+    // Add event listeners to edit and delete buttons
+    document.querySelectorAll('.edit-note-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card click event
+            const noteId = btn.dataset.noteId;
+            openNoteEditor(noteId);
+        });
+    });
+    
+    document.querySelectorAll('.delete-note-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card click event
+            const noteId = btn.dataset.noteId;
+            deleteNote(noteId);
+        });
+    });
+    
+    // Make the entire note card clickable to view/edit
+    document.querySelectorAll('.note-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const noteId = card.dataset.noteId;
+            openNoteEditor(noteId);
+        });
+    });
+}
+
+// Function to open the note editor
+function openNoteEditor(noteId = null) {
+    const noteEditor = document.getElementById('note-editor');
+    const titleInput = document.getElementById('note-title');
+    const contentInput = document.getElementById('note-content');
+    
+    // Show the editor
+    noteEditor.classList.remove('hidden');
+    
+    // If we have a noteId, we're editing an existing note
+    if (noteId) {
+        const note = notes.find(n => n.id === noteId);
+        if (note) {
+            titleInput.value = note.title;
+            contentInput.value = note.content;
+            noteEditor.dataset.noteId = noteId;
+        }
+    } else {
+        // New note
+        titleInput.value = '';
+        contentInput.value = '';
+        delete noteEditor.dataset.noteId;
+    }
+    
+    // Focus on the title input
+    titleInput.focus();
+}
+
+// Function to save a note
+function saveNote() {
+    const noteEditor = document.getElementById('note-editor');
+    const titleInput = document.getElementById('note-title');
+    const contentInput = document.getElementById('note-content');
+    
+    const title = titleInput.value.trim() || 'Untitled Note';
+    const content = contentInput.value.trim();
+    
+    // If we're editing an existing note
+    if (noteEditor.dataset.noteId) {
+        const noteId = noteEditor.dataset.noteId;
+        const noteIndex = notes.findIndex(n => n.id === noteId);
+        
+        if (noteIndex !== -1) {
+            notes[noteIndex].title = title;
+            notes[noteIndex].content = content;
+            notes[noteIndex].lastModified = new Date().toISOString();
+        }
+    } else {
+        // Create a new note
+        const newNote = {
+            id: Date.now().toString(), // Use timestamp as ID
+            title,
+            content,
+            created: new Date().toISOString(),
+            lastModified: new Date().toISOString()
+        };
+        
+        notes.push(newNote);
+    }
+    
+    // Save notes to localStorage
+    saveNotes();
+    
+    // Rerender notes
+    renderNotes();
+    
+    // Hide the editor
+    noteEditor.classList.add('hidden');
+}
+
+// Function to cancel editing a note
+function cancelNoteEdit() {
+    const noteEditor = document.getElementById('note-editor');
+    noteEditor.classList.add('hidden');
+}
+
+// Function to delete a note
+function deleteNote(noteId) {
+    if (confirm('Are you sure you want to delete this note?')) {
+        // Filter out the note with the given ID
+        notes = notes.filter(note => note.id !== noteId);
+        
+        // Save notes to localStorage
+        saveNotes();
+        
+        // Rerender notes
+        renderNotes();
+    }
+}
+
+// ------ TASKS FUNCTIONALITY ------
+
 // Function to save tasks to localStorage
 function saveTasks() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -266,7 +453,10 @@ function init() {
     // Load tasks from localStorage
     loadTasks();
     
-    // Set up event listeners
+    // Load notes from localStorage
+    loadNotes();
+    
+    // Set up event listeners for tasks
     const archiveToggle = document.getElementById('archive-toggle');
     if (archiveToggle) {
         archiveToggle.addEventListener('click', toggleArchive);
@@ -283,10 +473,32 @@ function init() {
         if (archiveToggle) archiveToggle.textContent = 'Show Completed Tasks';
     }
     
+    // Set up event listeners for notes
+    const notesToggle = document.getElementById('notes-toggle');
+    if (notesToggle) {
+        notesToggle.addEventListener('click', toggleNotesPanel);
+    }
+    
+    const addNoteBtn = document.getElementById('add-note');
+    if (addNoteBtn) {
+        addNoteBtn.addEventListener('click', () => openNoteEditor());
+    }
+    
+    const saveNoteBtn = document.getElementById('save-note');
+    if (saveNoteBtn) {
+        saveNoteBtn.addEventListener('click', saveNote);
+    }
+    
+    const cancelNoteBtn = document.getElementById('cancel-note');
+    if (cancelNoteBtn) {
+        cancelNoteBtn.addEventListener('click', cancelNoteEdit);
+    }
+    
     // Render the UI
     renderCategories();
     renderTasks();
     renderArchive();
+    renderNotes();
     updateTimestamp();
 }
 
