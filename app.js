@@ -30,139 +30,229 @@ function getRelativeTimeDescription(dateString) {
     }
 }
 
-// ------ AUTHENTICATION FUNCTIONALITY ------
+// ------ GOOGLE AUTHENTICATION FUNCTIONALITY ------
 
-// Variable to track authentication state
-let isAuthenticated = false;
+// The authorized Google email that can modify tasks
+const AUTHORIZED_EMAIL = 'nandies1019@gmail.com';
 
-// Function to check if password is set
-function isPasswordSet() {
-    return localStorage.getItem('taskPassword') !== null;
-}
+// Your Google Client ID
+const GOOGLE_CLIENT_ID = '1091457403789-c05s07g0f2vkoq809eq9vqll2e2jh5i4.apps.googleusercontent.com';
 
-// Function to hash a password (for simple protection, not truly secure)
-function hashPassword(password) {
-    // This is a simple hash function, not secure for production
-    let hash = 0;
-    for (let i = 0; i < password.length; i++) {
-        const char = password.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
+// Function to initialize Google authentication
+function initializeGoogleAuth() {
+    if (typeof google === 'undefined' || !google.accounts) {
+        console.error('Google Identity Services not loaded');
+        // Try again in a second
+        setTimeout(initializeGoogleAuth, 1000);
+        return;
     }
-    return hash.toString();
-}
-
-// Function to set up password
-function setupPassword(password) {
-    const hashedPassword = hashPassword(password);
-    localStorage.setItem('taskPassword', hashedPassword);
-    alert('Password set successfully. You will need this password to mark tasks as complete.');
-    hidePasswordDialog();
-}
-
-// Function to verify password
-function verifyPassword(password) {
-    const storedHash = localStorage.getItem('taskPassword');
-    const inputHash = hashPassword(password);
     
-    if (storedHash === inputHash) {
-        isAuthenticated = true;
-        hidePasswordDialog();
-        
-        // Authorize for a session (until page refresh)
-        sessionStorage.setItem('isAuthenticated', 'true');
-        
-        // Enable all complete buttons
-        document.querySelectorAll('.complete-btn').forEach(btn => {
-            btn.disabled = false;
+    try {
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true
         });
         
+        // Render the Sign In With Google button
+        const authButton = document.getElementById('auth-button');
+        if (authButton) {
+            google.accounts.id.renderButton(authButton, {
+                type: 'standard',
+                theme: 'outline',
+                size: 'large',
+                text: 'signin_with',
+                shape: 'rectangular',
+                logo_alignment: 'left',
+                width: authButton.offsetWidth
+            });
+        }
+        
+        // Also prompt One Tap UI if user is not signed in
+        if (!isGoogleAuthenticated()) {
+            google.accounts.id.prompt();
+        }
+    } catch (error) {
+        console.error('Error initializing Google Sign-In:', error);
+    }
+}
+
+// Function to handle Google Sign-In response
+function handleGoogleCredentialResponse(response) {
+    const idToken = response.credential;
+    if (idToken) {
+        // Process and store the ID token
+        try {
+            // Parse JWT payload
+            const payload = parseJwt(idToken);
+            
+            // Save user info to localStorage
+            const userData = {
+                email: payload.email,
+                name: payload.name || payload.email.split('@')[0],
+                picture: payload.picture || '',
+                exp: payload.exp
+            };
+            
+            localStorage.setItem('google_user_data', JSON.stringify(userData));
+            localStorage.setItem('google_authenticated', 'true');
+            localStorage.setItem('google_id_token', idToken);
+            
+            // Check if user is authorized
+            if (userData.email === AUTHORIZED_EMAIL) {
+                // Update UI to reflect authorized status
+                updateAuthUI();
+                renderTasks();
+                renderArchive();
+            } else {
+                // User is not authorized
+                alert(`The email address ${userData.email} is not authorized to modify tasks. Only ${AUTHORIZED_EMAIL} can make changes.`);
+                logoutFromGoogle();
+            }
+        } catch (error) {
+            console.error('Error processing Google sign-in:', error);
+            alert('Failed to process authentication. Please try again.');
+        }
+    }
+}
+
+// Function to parse JWT token
+function parseJwt(token) {
+    try {
+        // Get the payload part of the JWT
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error('Error parsing JWT:', error);
+        return {};
+    }
+}
+
+// Function to check if user is authenticated with Google
+function isGoogleAuthenticated() {
+    if (localStorage.getItem('google_authenticated') !== 'true') {
+        return false;
+    }
+    
+    try {
+        // Check if token is expired
+        const userData = JSON.parse(localStorage.getItem('google_user_data') || '{}');
+        const now = Math.floor(Date.now() / 1000);
+        
+        if (userData.exp && userData.exp < now) {
+            // Token is expired, clean up
+            logoutFromGoogle();
+            return false;
+        }
+        
         return true;
-    } else {
-        alert('Incorrect password. Please try again.');
+    } catch (error) {
         return false;
     }
 }
 
-// Function to show password dialog
-function showPasswordDialog(action) {
-    const passwordDialog = document.getElementById('password-dialog');
-    const setupForm = document.getElementById('password-setup-form');
-    const verifyForm = document.getElementById('password-verify-form');
+// Function to check if the authenticated user is authorized
+function isAuthorizedUser() {
+    if (!isGoogleAuthenticated()) return false;
     
-    passwordDialog.classList.remove('hidden');
-    
-    if (action === 'setup') {
-        setupForm.classList.remove('hidden');
-        verifyForm.classList.add('hidden');
-    } else if (action === 'verify') {
-        setupForm.classList.add('hidden');
-        verifyForm.classList.remove('hidden');
+    try {
+        const userData = JSON.parse(localStorage.getItem('google_user_data') || '{}');
+        return userData.email === AUTHORIZED_EMAIL;
+    } catch (error) {
+        console.error('Error checking authorization:', error);
+        return false;
     }
 }
 
-// Function to hide password dialog
-function hidePasswordDialog() {
-    const passwordDialog = document.getElementById('password-dialog');
-    passwordDialog.classList.add('hidden');
+// Function to handle Google logout
+function logoutFromGoogle() {
+    // Clear auth data from localStorage
+    localStorage.removeItem('google_authenticated');
+    localStorage.removeItem('google_user_data');
+    localStorage.removeItem('google_id_token');
+    
+    // Disable task modification buttons
+    document.querySelectorAll('.complete-btn, .restore-btn').forEach(btn => {
+        btn.disabled = true;
+    });
+    
+    // Update the UI
+    updateAuthUI();
+    
+    // Revoke Google authentication
+    if (typeof google !== 'undefined' && google.accounts) {
+        google.accounts.id.disableAutoSelect();
+    }
+}
+
+// Function to update the authentication UI
+function updateAuthUI() {
+    const authContainer = document.getElementById('auth-container');
+    const authStatus = document.getElementById('auth-status');
+    const signOutButton = document.getElementById('sign-out-button');
+    const authButton = document.getElementById('auth-button');
+    
+    if (!authContainer || !authStatus || !signOutButton) return;
+    
+    if (isGoogleAuthenticated()) {
+        try {
+            const userData = JSON.parse(localStorage.getItem('google_user_data') || '{}');
+            
+            // Hide login button, show logout button
+            if (authButton) authButton.style.display = 'none';
+            signOutButton.style.display = 'block';
+            
+            if (isAuthorizedUser()) {
+                authStatus.textContent = `Logged in as ${userData.email} (Authorized)`;
+                authStatus.className = 'auth-status authorized';
+                
+                // Enable task modification buttons
+                document.querySelectorAll('.complete-btn, .restore-btn').forEach(btn => {
+                    btn.disabled = false;
+                });
+            } else {
+                authStatus.textContent = `Logged in as ${userData.email} (Not authorized)`;
+                authStatus.className = 'auth-status unauthorized';
+            }
+        } catch (error) {
+            console.error('Error updating auth UI:', error);
+        }
+    } else {
+        // Show Google Sign-In button, hide logout button
+        if (authButton) authButton.style.display = 'block';
+        signOutButton.style.display = 'none';
+        
+        authStatus.textContent = 'Not logged in';
+        authStatus.className = 'auth-status';
+        
+        // Initialize Google Sign-In button
+        initializeGoogleAuth();
+        
+        // Disable task modification buttons
+        document.querySelectorAll('.complete-btn, .restore-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+    }
 }
 
 // Function to handle task completion attempt
 function handleTaskCompletionAttempt(taskId) {
-    // If already authenticated, proceed
-    if (isAuthenticated) {
+    if (isGoogleAuthenticated() && isAuthorizedUser()) {
         toggleTaskCompletion(taskId);
-        return;
-    }
-    
-    // Check if password is set
-    if (!isPasswordSet()) {
-        showPasswordDialog('setup');
-        
-        // Store the task ID for later use
-        document.getElementById('password-setup-form').dataset.taskId = taskId;
     } else {
-        showPasswordDialog('verify');
+        alert(`You must be logged in as ${AUTHORIZED_EMAIL} to modify tasks.`);
         
-        // Store the task ID for later use
-        document.getElementById('password-verify-form').dataset.taskId = taskId;
-    }
-}
-
-// Function to render categories
-function renderCategories() {
-    const categoryContainer = document.getElementById('category-filters');
-    if (!categoryContainer) return;
-    
-    // Get unique categories
-    const categories = ['All', ...new Set(tasks.map(task => task.category))];
-    
-    // Create category buttons
-    categories.forEach(category => {
-        const categoryBtn = document.createElement('button');
-        categoryBtn.className = 'category-btn';
-        categoryBtn.dataset.category = category;
-        categoryBtn.textContent = category;
-        
-        if (category === 'All') {
-            categoryBtn.classList.add('active');
+        // Prompt Google Sign-In
+        if (typeof google !== 'undefined' && google.accounts) {
+            google.accounts.id.prompt();
         }
-        
-        categoryBtn.addEventListener('click', () => {
-            // Remove active class from all buttons
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Add active class to clicked button
-            categoryBtn.classList.add('active');
-            
-            // Filter tasks
-            renderTasks(category);
-        });
-        
-        categoryContainer.appendChild(categoryBtn);
-    });
+    }
 }
 
 // ------ NOTES FUNCTIONALITY ------
@@ -352,6 +442,45 @@ function deleteNote(noteId) {
 
 // ------ TASKS FUNCTIONALITY ------
 
+// Function to render categories
+function renderCategories() {
+    const categoryContainer = document.getElementById('category-filters');
+    if (!categoryContainer) return;
+    
+    // Get unique categories
+    const categories = ['All', ...new Set(tasks.map(task => task.category))];
+    
+    // Clear existing categories
+    categoryContainer.innerHTML = '';
+    
+    // Create category buttons
+    categories.forEach(category => {
+        const categoryBtn = document.createElement('button');
+        categoryBtn.className = 'category-btn';
+        categoryBtn.dataset.category = category;
+        categoryBtn.textContent = category;
+        
+        if (category === 'All') {
+            categoryBtn.classList.add('active');
+        }
+        
+        categoryBtn.addEventListener('click', () => {
+            // Remove active class from all buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            categoryBtn.classList.add('active');
+            
+            // Filter tasks
+            renderTasks(category);
+        });
+        
+        categoryContainer.appendChild(categoryBtn);
+    });
+}
+
 // Function to save tasks to localStorage
 function saveTasks() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -377,10 +506,12 @@ function toggleArchive() {
     
     if (archiveSection.classList.contains('hidden')) {
         archiveSection.classList.remove('hidden');
-        archiveToggle.textContent = 'Hide Completed Tasks';
+        archiveToggle.textContent = 'Hide Completed Tasks ';
+        archiveToggle.appendChild(document.querySelector('.archive-counter'));
     } else {
         archiveSection.classList.add('hidden');
-        archiveToggle.textContent = 'Show Completed Tasks';
+        archiveToggle.textContent = 'Show Completed Tasks ';
+        archiveToggle.appendChild(document.querySelector('.archive-counter'));
     }
     
     // Save preference to localStorage
@@ -462,7 +593,7 @@ function renderTasks(categoryFilter = 'All') {
                 <span class="task-deadline">${getRelativeTimeDescription(task.deadline)}</span>
             </div>
             <div class="task-date">${formatDate(task.deadline)}</div>
-            <button class="complete-btn" data-task-id="${task.id}" ${isAuthenticated ? '' : 'disabled'}>Mark Complete</button>
+            <button class="complete-btn" data-task-id="${task.id}" ${isAuthorizedUser() ? '' : 'disabled'}>Mark Complete</button>
         `;
         
         taskContainer.appendChild(taskCard);
@@ -520,7 +651,7 @@ function renderArchive() {
             <h3 class="task-title">${task.title}</h3>
             <p class="task-description">${task.description}</p>
             <div class="task-date">Completed</div>
-            <button class="restore-btn" data-task-id="${task.id}" ${isAuthenticated ? '' : 'disabled'}>Restore Task</button>
+            <button class="restore-btn" data-task-id="${task.id}" ${isAuthorizedUser() ? '' : 'disabled'}>Restore Task</button>
         `;
         
         archiveContainer.appendChild(taskCard);
@@ -549,14 +680,24 @@ function updateTimestamp() {
 
 // Initialize the application
 function init() {
-    // Check if session is authenticated
-    isAuthenticated = sessionStorage.getItem('isAuthenticated') === 'true';
-    
     // Load tasks from localStorage
     loadTasks();
     
     // Load notes from localStorage
     loadNotes();
+    
+    // Check for authentication status from redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    const authStatus = urlParams.get('auth');
+    
+    if (authStatus === 'success') {
+        // Remove the query parameter
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (authStatus === 'error') {
+        alert('Authentication failed. Please try again.');
+        // Remove the query parameter
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
     
     // Set up event listeners for tasks
     const archiveToggle = document.getElementById('archive-toggle');
@@ -569,10 +710,16 @@ function init() {
     const archiveSection = document.getElementById('archive-section');
     if (archiveVisible) {
         archiveSection.classList.remove('hidden');
-        if (archiveToggle) archiveToggle.textContent = 'Hide Completed Tasks';
+        if (archiveToggle) {
+            archiveToggle.textContent = 'Hide Completed Tasks ';
+            archiveToggle.appendChild(document.getElementById('archive-counter'));
+        }
     } else {
         archiveSection.classList.add('hidden');
-        if (archiveToggle) archiveToggle.textContent = 'Show Completed Tasks';
+        if (archiveToggle) {
+            archiveToggle.textContent = 'Show Completed Tasks ';
+            archiveToggle.appendChild(document.getElementById('archive-counter'));
+        }
     }
     
     // Set up event listeners for notes
@@ -596,66 +743,10 @@ function init() {
         cancelNoteBtn.addEventListener('click', cancelNoteEdit);
     }
     
-    // Set up event listeners for password dialogs
-    const setupPasswordForm = document.getElementById('password-setup-form');
-    const verifyPasswordForm = document.getElementById('password-verify-form');
-    
-    if (setupPasswordForm) {
-        setupPasswordForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const passwordInput = document.getElementById('setup-password-input');
-            const password = passwordInput.value.trim();
-            
-            if (password.length < 4) {
-                alert('Password must be at least 4 characters.');
-                return;
-            }
-            
-            setupPassword(password);
-            
-            // Get the task ID and complete it
-            const taskId = this.dataset.taskId;
-            if (taskId) {
-                isAuthenticated = true;
-                toggleTaskCompletion(taskId);
-            }
-            
-            // Clear the input
-            passwordInput.value = '';
-        });
-    }
-    
-    if (verifyPasswordForm) {
-        verifyPasswordForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const passwordInput = document.getElementById('verify-password-input');
-            const password = passwordInput.value.trim();
-            
-            const isValid = verifyPassword(password);
-            
-            if (isValid) {
-                // Get the task ID and complete it
-                const taskId = this.dataset.taskId;
-                if (taskId) {
-                    toggleTaskCompletion(taskId);
-                }
-            }
-            
-            // Clear the input
-            passwordInput.value = '';
-        });
-    }
-    
-    // Cancel buttons for password dialogs
-    const setupCancelBtn = document.getElementById('setup-cancel');
-    const verifyCancelBtn = document.getElementById('verify-cancel');
-    
-    if (setupCancelBtn) {
-        setupCancelBtn.addEventListener('click', hidePasswordDialog);
-    }
-    
-    if (verifyCancelBtn) {
-        verifyCancelBtn.addEventListener('click', hidePasswordDialog);
+    // Set up auth event listeners
+    const signOutButton = document.getElementById('sign-out-button');
+    if (signOutButton) {
+        signOutButton.addEventListener('click', logoutFromGoogle);
     }
     
     // Render the UI
@@ -663,7 +754,11 @@ function init() {
     renderTasks();
     renderArchive();
     renderNotes();
+    updateAuthUI();
     updateTimestamp();
+    
+    // Initialize Google Sign-In (after a brief delay to ensure the DOM is ready)
+    setTimeout(initializeGoogleAuth, 500);
 }
 
 // Run initialization when the page loads

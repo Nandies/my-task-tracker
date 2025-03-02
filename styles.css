@@ -45,9 +45,11 @@
     --note-action-color: #3b82f6;
     --note-action-hover: #2563eb;
     
-    /* Password dialog colors */
-    --password-overlay: rgba(0, 0, 0, 0.6);
-    --password-dialog-bg: #ffffff;
+    /* Google colors */
+    --google-blue: #4285F4;
+    --google-red: #EA4335;
+    --google-yellow: #FBBC05;
+    --google-green: #34A853;
 }
 
 * {
@@ -70,11 +72,15 @@ body {
     position: relative;
 }
 
-/* Top Bar with Notes Button */
+/* Top Bar with Notes Button and Auth */
 .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     position: absolute;
     top: 1rem;
     left: 1rem;
+    right: 1rem;
     z-index: 10;
 }
 
@@ -102,89 +108,46 @@ body {
     height: 16px;
 }
 
-/* Password Dialog */
-.password-dialog {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--password-overlay);
+/* Auth Container */
+.auth-container {
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 2000;
+    gap: 1rem;
 }
 
-.password-dialog.hidden {
-    display: none;
+.g-signin-button {
+    min-width: 120px;
+    height: 40px;
 }
 
-.password-dialog-content {
-    background-color: var(--password-dialog-bg);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.password-dialog h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-}
-
-.password-dialog p {
-    margin-bottom: 1.5rem;
-    color: var(--text-light);
-    font-size: 0.875rem;
-}
-
-.password-input-group {
-    margin-bottom: 1.5rem;
-}
-
-.password-input-group input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #cbd5e1;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-}
-
-.password-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-}
-
-.password-submit-btn, .password-cancel-btn {
+.sign-out-button {
     padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 0.875rem;
-    transition: background-color 0.2s ease;
-}
-
-.password-submit-btn {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.password-submit-btn:hover {
-    background-color: var(--secondary-color);
-}
-
-.password-cancel-btn {
     background-color: var(--button-bg);
     color: var(--button-text);
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    box-shadow: var(--shadow);
 }
 
-.password-cancel-btn:hover {
+.sign-out-button:hover {
     background-color: var(--button-hover);
+}
+
+.auth-status {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    white-space: nowrap;
+}
+
+.auth-status.authorized {
+    color: var(--complete-button-text);
+}
+
+.auth-status.unauthorized {
+    color: var(--high-text);
 }
 
 /* Notes Panel */
@@ -371,6 +334,7 @@ body {
 header {
     text-align: center;
     margin-bottom: 2rem;
+    margin-top: 3rem; /* Space for the top bar */
 }
 
 h1 {
@@ -596,7 +560,7 @@ h1 {
     color: var(--complete-button-text);
 }
 
-.complete-btn:hover {
+.complete-btn:hover:not(:disabled) {
     background-color: #86efac;
 }
 
@@ -611,7 +575,7 @@ h1 {
     color: var(--restore-button-text);
 }
 
-.restore-btn:hover {
+.restore-btn:hover:not(:disabled) {
     background-color: #93c5fd;
 }
 
@@ -697,15 +661,40 @@ footer {
         width: 100%;
     }
     
-    .password-dialog-content {
-        margin: 0 1rem;
-        padding: 1.5rem;
+    .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-container {
+        align-self: flex-end;
+    }
+    
+    .auth-status {
+        display: none;
+    }
+    
+    header {
+        margin-top: 4rem;
     }
 }
 
 /* Add padding to account for the notes button on small screens */
 @media (max-width: 576px) {
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .auth-container {
+        align-self: center;
+        margin-top: 1rem;
+    }
+    
     header {
-        margin-top: 3rem;
+        margin-top: 6rem;
     }
 }

@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Load Google Identity Services API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <div class="container">
@@ -19,43 +21,18 @@
                 </svg>
                 <span>Notes</span>
             </button>
+            
+            <div id="auth-container" class="auth-container">
+                <div id="auth-button" class="g-signin-button"></div>
+                <button id="sign-out-button" class="sign-out-button" style="display: none;">Sign Out</button>
+                <div id="auth-status" class="auth-status">Not logged in</div>
+            </div>
         </div>
         
         <header>
             <h1>My Academic Tasks</h1>
             <p class="subtitle">Assignments and deadlines I'm working on</p>
         </header>
-
-        <!-- Password Dialog -->
-        <div id="password-dialog" class="password-dialog hidden">
-            <div class="password-dialog-content">
-                <!-- Password Setup Form -->
-                <form id="password-setup-form" class="hidden">
-                    <h3>Set Up Password</h3>
-                    <p>Create a password to protect your tasks.</p>
-                    <div class="password-input-group">
-                        <input type="password" id="setup-password-input" placeholder="Create a password" minlength="4" required>
-                    </div>
-                    <div class="password-actions">
-                        <button type="submit" class="password-submit-btn">Set Password</button>
-                        <button type="button" id="setup-cancel" class="password-cancel-btn">Cancel</button>
-                    </div>
-                </form>
-                
-                <!-- Password Verification Form -->
-                <form id="password-verify-form" class="hidden">
-                    <h3>Enter Password</h3>
-                    <p>Enter your password to mark tasks as complete.</p>
-                    <div class="password-input-group">
-                        <input type="password" id="verify-password-input" placeholder="Enter password" required>
-                    </div>
-                    <div class="password-actions">
-                        <button type="submit" class="password-submit-btn">Verify</button>
-                        <button type="button" id="verify-cancel" class="password-cancel-btn">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
         <!-- Notes Panel -->
         <div id="notes-panel" class="notes-panel hidden">
