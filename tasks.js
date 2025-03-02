@@ -68,7 +68,7 @@ const tasks = [
         priority: "medium",
         deadline: "2025-03-02",
         category: "CISS 316",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 8,
@@ -77,7 +77,7 @@ const tasks = [
         priority: "medium",
         deadline: "2025-03-02",
         category: "CISS 316",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 9,
@@ -86,7 +86,7 @@ const tasks = [
         priority: "medium",
         deadline: "2025-03-02",
         category: "CISS 316",
-        status: "pending"
+        status: "completed"
     },
 
     // CISC 360 Tasks
