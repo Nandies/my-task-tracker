@@ -52,7 +52,6 @@
             display: none;
         }
     </style>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <div class="auth-container">
@@ -62,62 +61,23 @@
         <div id="error-message" class="error-message"></div>
     </div>
     <script>
-        // Extract authentication information from URL hash or query parameters
+        // Extract authentication information from URL hash
         function getAuthParams() {
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const queryParams = new URLSearchParams(window.location.search);
             
             // Check for token in hash (used in implicit flow)
-            if (hashParams.has('id_token') || hashParams.has('access_token')) {
+            if (hashParams.has('id_token')) {
                 return { 
-                    id_token: hashParams.get('id_token'),
-                    access_token: hashParams.get('access_token')
+                    id_token: hashParams.get('id_token')
                 };
-            }
-            
-            // Check for authorization code in query params
-            if (queryParams.has('code')) {
-                return { code: queryParams.get('code') };
             }
             
             // Check for error
-            if (queryParams.has('error')) {
-                return { error: queryParams.get('error') };
+            if (hashParams.has('error')) {
+                return { error: hashParams.get('error') };
             }
             
             return null;
-        }
-        
-        // Process token and save user info
-        function processIdToken(idToken) {
-            try {
-                // Parse JWT payload
-                const base64Url = idToken.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                
-                const payload = JSON.parse(jsonPayload);
-                
-                // Save user info to localStorage
-                const userData = {
-                    email: payload.email,
-                    name: payload.name || payload.email.split('@')[0],
-                    picture: payload.picture || '',
-                    exp: payload.exp
-                };
-                
-                localStorage.setItem('google_user_data', JSON.stringify(userData));
-                localStorage.setItem('google_authenticated', 'true');
-                localStorage.setItem('google_id_token', idToken);
-                
-                // Redirect back to main page
-                window.location.href = 'index.html?auth=success';
-            } catch (error) {
-                console.error('Error processing token:', error);
-                showError('Failed to process authentication token.');
-            }
         }
         
         // Show error message
@@ -133,8 +93,40 @@
             }, 3000);
         }
         
-        // Initialize
-        function init() {
+        // Process token and save user info
+        function processToken(token) {
+            try {
+                // Parse the JWT token
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Invalid token format');
+                }
+                
+                // Decode the payload (middle part)
+                const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                
+                // Save user data to localStorage
+                const userData = {
+                    email: payload.email,
+                    name: payload.name || payload.email.split('@')[0],
+                    picture: payload.picture || '',
+                    exp: payload.exp
+                };
+                
+                localStorage.setItem('google_user_data', JSON.stringify(userData));
+                localStorage.setItem('google_authenticated', 'true');
+                localStorage.setItem('google_id_token', token);
+                
+                // Redirect back to main page
+                window.location.href = 'index.html?auth=success';
+            } catch (error) {
+                console.error('Token processing error:', error);
+                showError('Failed to process authentication token: ' + error.message);
+            }
+        }
+        
+        // Initialize and process auth
+        function processAuth() {
             const params = getAuthParams();
             
             if (!params) {
@@ -148,22 +140,15 @@
             }
             
             if (params.id_token) {
-                processIdToken(params.id_token);
-                return;
-            }
-            
-            if (params.code) {
-                // For code flow, normally we would send this to a backend
-                // Since we don't have a backend, we'll need to use the implicit flow instead
-                showError('Authorization code received, but we need a backend to process it. Please use the Google Sign-In button on the main page.');
+                processToken(params.id_token);
                 return;
             }
             
             showError('Unexpected authentication response');
         }
         
-        // Run initialization
-        window.addEventListener('DOMContentLoaded', init);
+        // Start processing
+        window.addEventListener('DOMContentLoaded', processAuth);
     </script>
 </body>
 </html>

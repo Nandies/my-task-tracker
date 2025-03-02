@@ -40,31 +40,12 @@ const GOOGLE_CLIENT_ID = '1091457403789-c05s07g0f2vkoq809eq9vqll2e2jh5i4.apps.go
 
 // Function to initialize Google authentication
 function initializeGoogleAuth() {
-    // Set up a simpler click handler for the auth button
-    const authButton = document.getElementById('auth-button');
-    if (authButton) {
-        // Remove any existing event listeners
-        const newAuthButton = authButton.cloneNode(true);
-        authButton.parentNode.replaceChild(newAuthButton, authButton);
-        
-        // Add the click event listener for the new button
-        newAuthButton.addEventListener('click', () => {
-            // Google OAuth parameters
-            const clientId = '1091457403789-c05s07g0f2vkoq809eq9vqll2e2jh5i4.apps.googleusercontent.com';
-            const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname.replace('index.html', '') + 'auth.html');
-            const scope = encodeURIComponent('email profile');
-            const responseType = 'id_token';
-            const prompt = 'select_account';
-            
-            // Construct and redirect to Google auth URL
-            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&prompt=${prompt}`;
-            window.location.href = authUrl;
-        });
-    }
+    // We're using a direct link now, so we don't need to set up a click handler
+    console.log("Auth is now handled by direct link");
     
-    // Don't try to use the google.accounts.id methods since they may not be loading correctly
+    // We just need to update the UI based on current auth status
+    updateAuthUI();
 }
-
 
 // Function to handle Google Sign-In response
 function handleGoogleCredentialResponse(response) {
@@ -213,14 +194,11 @@ function updateAuthUI() {
         }
     } else {
         // Show Google Sign-In button, hide logout button
-        if (authButton) authButton.style.display = 'block';
+        if (authButton) authButton.style.display = 'inline-flex';
         signOutButton.style.display = 'none';
         
         authStatus.textContent = 'Not logged in';
         authStatus.className = 'auth-status';
-        
-        // Initialize Google Sign-In button
-        initializeGoogleAuth();
         
         // Disable task modification buttons
         document.querySelectorAll('.complete-btn, .restore-btn').forEach(btn => {
@@ -228,6 +206,7 @@ function updateAuthUI() {
         });
     }
 }
+
 
 // Function to handle task completion attempt
 function handleTaskCompletionAttempt(taskId) {
