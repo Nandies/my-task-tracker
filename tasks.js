@@ -97,7 +97,7 @@ const tasks = [
         priority: "medium",
         deadline: "2025-03-02",
         category: "CISC 360",
-        status: "compeleted"
+        status: "completed"
     },
     {
         id: 11,
