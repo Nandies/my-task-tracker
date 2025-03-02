@@ -23,7 +23,14 @@
             </button>
             
             <div id="auth-container" class="auth-container">
-                <div id="auth-button" class="g-signin-button"></div>
+                <!-- Replace the empty div with an actual button for better visibility -->
+                <button id="auth-button" class="login-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" stroke="#4285F4" fill="none"></circle>
+                        <path d="M8 12L11 15L16 9" stroke="#4285F4"></path>
+                    </svg>
+                    Sign in with Google
+                </button>
                 <button id="sign-out-button" class="sign-out-button" style="display: none;">Sign Out</button>
                 <div id="auth-status" class="auth-status">Not logged in</div>
             </div>
