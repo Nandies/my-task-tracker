@@ -1,5 +1,8 @@
 // Main application code
 
+// The authorized Google email that can modify tasks
+const AUTHORIZED_EMAIL = 'nandies1019@gmail.com';
+
 // Function to format the date
 function formatDate(dateString) {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -32,101 +35,16 @@ function getRelativeTimeDescription(dateString) {
 
 // ------ GOOGLE AUTHENTICATION FUNCTIONALITY ------
 
-// The authorized Google email that can modify tasks
-const AUTHORIZED_EMAIL = 'nandies1019@gmail.com';
-
-// Your Google Client ID
-const GOOGLE_CLIENT_ID = '1091457403789-c05s07g0f2vkoq809eq9vqll2e2jh5i4.apps.googleusercontent.com';
-
-// Function to initialize Google authentication
+// Using simplified authentication with direct link
 function initializeGoogleAuth() {
-    // Set up the login button click handler
-    const authButton = document.getElementById('auth-button');
-    if (authButton) {
-        authButton.addEventListener('click', loginWithGoogle);
-    }
-    
-    // Update UI based on current auth status
+    // Since we're using a direct HTML link, we just need to update the UI
     updateAuthUI();
-}
-
-function loginWithGoogle() {
-    // OAuth parameters that are confirmed to work
-    const clientId = '1091457403789-c05s07g0f2vkoq809eq9vqll2e2jh5i4.apps.googleusercontent.com';
-    const redirectUri = encodeURIComponent(window.location.origin + '/my-task-tracker/auth.html');
-    const responseType = 'code';
-    const scope = 'email+profile';
-    
-    // Build the authorization URL with all required parameters
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&access_type=online&include_granted_scopes=true`;
-    
-    // Redirect to Google's auth page
-    console.log('Redirecting to Google auth:', authUrl);
-    window.location.href = authUrl;
-}
-
-
-// Function to handle Google Sign-In response
-function handleGoogleCredentialResponse(response) {
-    const idToken = response.credential;
-    if (idToken) {
-        // Process and store the ID token
-        try {
-            // Parse JWT payload
-            const payload = parseJwt(idToken);
-            
-            // Save user info to localStorage
-            const userData = {
-                email: payload.email,
-                name: payload.name || payload.email.split('@')[0],
-                picture: payload.picture || '',
-                exp: payload.exp
-            };
-            
-            localStorage.setItem('google_user_data', JSON.stringify(userData));
-            localStorage.setItem('google_authenticated', 'true');
-            localStorage.setItem('google_id_token', idToken);
-            
-            // Check if user is authorized
-            if (userData.email === AUTHORIZED_EMAIL) {
-                // Update UI to reflect authorized status
-                updateAuthUI();
-                renderTasks();
-                renderArchive();
-            } else {
-                // User is not authorized
-                alert(`The email address ${userData.email} is not authorized to modify tasks. Only ${AUTHORIZED_EMAIL} can make changes.`);
-                logoutFromGoogle();
-            }
-        } catch (error) {
-            console.error('Error processing Google sign-in:', error);
-            alert('Failed to process authentication. Please try again.');
-        }
-    }
-}
-
-// Function to parse JWT token
-function parseJwt(token) {
-    try {
-        // Get the payload part of the JWT
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-
-        return JSON.parse(jsonPayload);
-    } catch (error) {
-        console.error('Error parsing JWT:', error);
-        return {};
-    }
 }
 
 // Function to check if user is authenticated with Google
 function isGoogleAuthenticated() {
     return localStorage.getItem('google_authenticated') === 'true';
 }
-
 
 // Function to check if the authenticated user is authorized
 function isAuthorizedUser() {
@@ -156,10 +74,8 @@ function logoutFromGoogle() {
     // Update the UI
     updateAuthUI();
     
-    // Revoke Google authentication
-    if (typeof google !== 'undefined' && google.accounts) {
-        google.accounts.id.disableAutoSelect();
-    }
+    // Reload the page to ensure all state is reset
+    window.location.reload();
 }
 
 // Function to update the authentication UI
@@ -209,18 +125,12 @@ function updateAuthUI() {
     }
 }
 
-
 // Function to handle task completion attempt
 function handleTaskCompletionAttempt(taskId) {
     if (isGoogleAuthenticated() && isAuthorizedUser()) {
         toggleTaskCompletion(taskId);
     } else {
         alert(`You must be logged in as ${AUTHORIZED_EMAIL} to modify tasks.`);
-        
-        // Prompt Google Sign-In
-        if (typeof google !== 'undefined' && google.accounts) {
-            google.accounts.id.prompt();
-        }
     }
 }
 
@@ -647,8 +557,6 @@ function updateTimestamp() {
     lastUpdated.textContent = new Date().toLocaleString();
 }
 
-
-
 // Initialize the application
 function init() {
     // Load tasks from localStorage
@@ -679,17 +587,23 @@ function init() {
     // Check if archive should be visible based on previous preference
     const archiveVisible = localStorage.getItem('archiveVisible') === 'true';
     const archiveSection = document.getElementById('archive-section');
-    if (archiveVisible) {
+    if (archiveVisible && archiveSection) {
         archiveSection.classList.remove('hidden');
         if (archiveToggle) {
             archiveToggle.textContent = 'Hide Completed Tasks ';
-            archiveToggle.appendChild(document.getElementById('archive-counter'));
+            const counter = document.getElementById('archive-counter');
+            if (counter) {
+                archiveToggle.appendChild(counter);
+            }
         }
-    } else {
+    } else if (archiveSection) {
         archiveSection.classList.add('hidden');
         if (archiveToggle) {
             archiveToggle.textContent = 'Show Completed Tasks ';
-            archiveToggle.appendChild(document.getElementById('archive-counter'));
+            const counter = document.getElementById('archive-counter');
+            if (counter) {
+                archiveToggle.appendChild(counter);
+            }
         }
     }
     
@@ -727,9 +641,6 @@ function init() {
     renderNotes();
     updateAuthUI();
     updateTimestamp();
-    
-    // Initialize Google Sign-In (after a brief delay to ensure the DOM is ready)
-    setTimeout(initializeGoogleAuth, 500);
 }
 
 // Run initialization when the page loads
