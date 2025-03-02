@@ -683,22 +683,6 @@ footer {
 }
 
 /* Add padding to account for the notes button on small screens */
-@media (max-width: 576px) {
-    .top-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .auth-container {
-        align-self: center;
-        margin-top: 1rem;
-    }
-    
-    header {
-        margin-top: 6rem;
-    }
-}
-
 .login-button {
     display: flex;
     align-items: center;
@@ -707,7 +691,7 @@ footer {
     background-color: #4285F4;
     color: white;
     border: none;
-    border-radius: 9999px;
+    border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s ease;
@@ -721,4 +705,56 @@ footer {
 .login-button svg {
     width: 18px;
     height: 18px;
+}
+
+/* Make sure your auth-container has these styles */
+.auth-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.sign-out-button {
+    padding: 0.5rem 1rem;
+    background-color: #f1f5f9;
+    color: #475569;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.sign-out-button:hover {
+    background-color: #e2e8f0;
+}
+
+.auth-status {
+    font-size: 0.875rem;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.auth-status.authorized {
+    color: #166534;
+}
+
+.auth-status.unauthorized {
+    color: #b91c1c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .auth-container {
+        position: static;
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+    
+    .auth-status {
+        display: none;
+    }
 }

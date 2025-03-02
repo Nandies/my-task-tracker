@@ -40,12 +40,31 @@ const GOOGLE_CLIENT_ID = '1091457403789-c05s07g0f2vkoq809eq9vqll2e2jh5i4.apps.go
 
 // Function to initialize Google authentication
 function initializeGoogleAuth() {
-    // We're using a direct link now, so we don't need to set up a click handler
-    console.log("Auth is now handled by direct link");
+    // Set up the login button click handler
+    const authButton = document.getElementById('auth-button');
+    if (authButton) {
+        authButton.addEventListener('click', loginWithGoogle);
+    }
     
-    // We just need to update the UI based on current auth status
+    // Update UI based on current auth status
     updateAuthUI();
 }
+
+function loginWithGoogle() {
+    // OAuth parameters that are confirmed to work
+    const clientId = '1091457403789-c05s07g0f2vkoq809eq9vqll2e2jh5i4.apps.googleusercontent.com';
+    const redirectUri = encodeURIComponent(window.location.origin + '/my-task-tracker/auth.html');
+    const responseType = 'code';
+    const scope = 'email+profile';
+    
+    // Build the authorization URL with all required parameters
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&access_type=online&include_granted_scopes=true`;
+    
+    // Redirect to Google's auth page
+    console.log('Redirecting to Google auth:', authUrl);
+    window.location.href = authUrl;
+}
+
 
 // Function to handle Google Sign-In response
 function handleGoogleCredentialResponse(response) {
@@ -105,26 +124,9 @@ function parseJwt(token) {
 
 // Function to check if user is authenticated with Google
 function isGoogleAuthenticated() {
-    if (localStorage.getItem('google_authenticated') !== 'true') {
-        return false;
-    }
-    
-    try {
-        // Check if token is expired
-        const userData = JSON.parse(localStorage.getItem('google_user_data') || '{}');
-        const now = Math.floor(Date.now() / 1000);
-        
-        if (userData.exp && userData.exp < now) {
-            // Token is expired, clean up
-            logoutFromGoogle();
-            return false;
-        }
-        
-        return true;
-    } catch (error) {
-        return false;
-    }
+    return localStorage.getItem('google_authenticated') === 'true';
 }
+
 
 // Function to check if the authenticated user is authorized
 function isAuthorizedUser() {
