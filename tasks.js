@@ -3,6 +3,8 @@
 // 24 last ID
 
 
+// Make seperate files for each course to make it easier to update
+
 const tasks = [
     // Math 372 Tasks
     {
