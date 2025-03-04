@@ -1,5 +1,7 @@
 // This file contains your task data
 // Edit this file to update your tasks
+// 24 last ID
+
 
 const tasks = [
     // Math 372 Tasks
@@ -10,7 +12,7 @@ const tasks = [
         priority: "high",
         deadline: "2025-03-04",
         category: "Math",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 2,
@@ -19,7 +21,7 @@ const tasks = [
         priority: "high",
         deadline: "2025-03-04",
         category: "Math",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 3,
@@ -28,7 +30,7 @@ const tasks = [
         priority: "high",
         deadline: "2025-03-04",
         category: "Math",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 4,
@@ -39,14 +41,41 @@ const tasks = [
         category: "Math",
         status: "pending"
     },
+    {
+        id: 17,
+        title: "Math 372 Section 3.5 Complex Zeros",
+        description: "Complete webassign homework on Complex Zeros",
+        priority: "high",
+        deadline: "2025-03-11",
+        category: "Math",
+        status: "pending"
+    },
+    {
+        id: 18,
+        title: "Math 372 Section 3.6 Rational Functions",
+        description: "Complete webassign homework on Rational Functions",
+        priority: "high",
+        deadline: "2025-03-11",
+        category: "Math",
+        status: "pending"
+    },
+    {
+        id: 19,
+        title: "Math 372 Section 3.7 Polynomial/Rational Inequal",
+        description: "Complete webassign homework on Polynomial/Rational Inequal",
+        priority: "high",
+        deadline: "2025-03-11",
+        category: "Math",
+        status: "pending"
+    },
 
     // CISP 430 Tasks
     {
         id: 5,
         title: "CISP 430: Assignment A3",
         description: "Complete and submit assignment A3",
-        priority: "medium",
-        deadline: "2025-03-06",
+        priority: "high",
+        deadline: "2025-03-08",
         category: "CISP 430",
         status: "pending"
     },
@@ -54,11 +83,30 @@ const tasks = [
         id: 6,
         title: "CISP 430: Quiz Q3",
         description: "Complete and submit quiz Q3",
-        priority: "medium",
-        deadline: "2025-03-06",
+        priority: "high",
+        deadline: "2025-03-08",
         category: "CISP 430",
         status: "pending"
     },
+    {
+        id: 23,
+        title: "CISP 430: Assignment A4",
+        description: "Complete and submit assignment A4",
+        priority: "high",
+        deadline: "2025-03-22",
+        category: "CISP 430",
+        status: "pending"
+    },
+    {
+        id: 24,
+        title: "CISP 430: Quiz Q4",
+        description: "Complete and submit quiz Q4",
+        priority: "high",
+        deadline: "2025-03-22",
+        category: "CISP 430",
+        status: "pending"
+    },
+
 
     // CISS 316 Tasks
     {
@@ -88,6 +136,15 @@ const tasks = [
         category: "CISS 316",
         status: "completed"
     },
+    {
+        id: 20,
+        title: "CISS 316: Do Lab 7 Projects",
+        description: "Complete 4 activies",
+        priority: "high",
+        deadline: "2025-03-12",
+        category: "CISS 316",
+        status: "pending"
+    },
 
     // CISC 360 Tasks
     {
@@ -105,6 +162,24 @@ const tasks = [
         description: "Attend Saturday class session",
         priority: "high",
         deadline: "2025-03-08",
+        category: "CISC 360",
+        status: "pending"
+    },
+    {
+        id: 21,
+        title: "CISC 360: Complete Quiz 3 (Ch 5-6)",
+        description: "Complete Quiz 3 (Ch 5-6)",
+        priority: "high",
+        deadline: "2025-03-16",
+        category: "CISC 360",
+        status: "pending"
+    },
+    {
+        id: 22,
+        title: "CISC 360: Do Lab 3 Projects.",
+        description: "Check Feedback on canvas",
+        priority: "low",
+        deadline: "2025-03-16",
         category: "CISC 360",
         status: "pending"
     },
@@ -144,7 +219,7 @@ const tasks = [
         priority: "high",
         deadline: "2025-03-06",
         category: "Misc",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 16,
