@@ -27,6 +27,24 @@
         .login-button:hover {
             background-color: #3367D6;
         }
+        
+        /* Next task ID styling */
+        .next-id-container {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #6366f1;
+            font-weight: 500;
+            background-color: #eff6ff;
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        #next-task-id {
+            font-weight: 700;
+            color: #4f46e5;
+        }
     </style>
     <!-- Meta tag to prevent caching -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -63,6 +81,7 @@
         <header>
             <h1>My Academic Tasks</h1>
             <p class="subtitle">Assignments and deadlines I'm working on</p>
+            <div class="next-id-container">Next available task ID: <span id="next-task-id">-</span></div>
         </header>
 
         <!-- Notes Panel -->

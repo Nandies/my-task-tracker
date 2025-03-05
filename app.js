@@ -90,6 +90,7 @@ async function loadTasksFromCourseFiles() {
         renderCategories();
         renderTasks(activeCategory);
         renderArchive();
+        displayNextTaskId();
     } catch (error) {
         console.error('Error loading tasks from course files:', error);
         // Fall back to localStorage
@@ -436,6 +437,28 @@ function deleteNote(noteId) {
 }
 
 // ------ TASKS FUNCTIONALITY ------
+
+// Function to find the next available task ID
+function getNextTaskId() {
+    if (tasks.length === 0) return 1;
+    
+    // Find the highest ID currently in use
+    const highestId = tasks.reduce((maxId, task) => {
+        return Math.max(maxId, task.id);
+    }, 0);
+    
+    // Return the next available ID
+    return highestId + 1;
+}
+
+// Function to display the next available ID
+function displayNextTaskId() {
+    const nextIdContainer = document.getElementById('next-task-id');
+    if (nextIdContainer) {
+        const nextId = getNextTaskId();
+        nextIdContainer.textContent = nextId;
+    }
+}
 
 // Function to render categories
 function renderCategories() {
