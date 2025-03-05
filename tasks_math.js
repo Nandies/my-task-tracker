@@ -1,5 +1,5 @@
 // Math course tasks
-const courseTasks = [
+window.mathTasks = [
     {
         id: 1,
         title: "Math 372 Section 3.2 Polynomial Functions/Graphs",

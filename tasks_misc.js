@@ -1,5 +1,5 @@
 // Miscellaneous tasks
-const courseTasks = [
+window.miscTasks = [
     {
         id: 12,
         title: "Cyber Security Competition Preparation",

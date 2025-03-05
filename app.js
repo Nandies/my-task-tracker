@@ -38,92 +38,62 @@ function getRelativeTimeDescription(dateString) {
 
 // ------ TASK LOADING FUNCTIONALITY ------
 
-// Function to load tasks from separate course files
-async function loadTasksFromCourseFiles() {
-    try {
-        // Define the list of course files to load
-        const courseFiles = [
-            'tasks_math.js',
-            'tasks_cisp430.js',
-            'tasks_ciss316.js',
-            'tasks_cisc360.js',
-            'tasks_misc.js'
-        ];
-        
-        // Clear the current tasks array
-        tasks = [];
-        
-        // Load each course file
-        for (const file of courseFiles) {
-            try {
-                // Append a timestamp query parameter to prevent caching
-                const timestamp = new Date().getTime();
-                const response = await fetch(`${file}?t=${timestamp}`);
-                
-                if (response.ok) {
-                    const moduleText = await response.text();
-                    
-                    // Create a safe execution environment for the loaded JS
-                    const courseTasks = extractTasksFromModule(moduleText);
-                    
-                    // Add the course tasks to the main tasks array
-                    tasks = tasks.concat(courseTasks);
-                } else {
-                    console.warn(`Failed to load ${file}: ${response.status} ${response.statusText}`);
-                }
-            } catch (courseError) {
-                console.error(`Error loading ${file}:`, courseError);
-            }
-        }
-        
-        // Check if we should fall back to localStorage
-        if (tasks.length === 0) {
-            console.log('No tasks loaded from course files, checking localStorage');
-            loadTasksFromLocalStorage();
-        } else {
-            // Save the loaded tasks to localStorage as a backup
-            saveTasksToLocalStorage();
-        }
-        
-        // Render the tasks
-        const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'All';
-        renderCategories();
-        renderTasks(activeCategory);
-        renderArchive();
-        displayNextTaskId();
-    } catch (error) {
-        console.error('Error loading tasks from course files:', error);
-        // Fall back to localStorage
+// Function to load tasks directly from script tags
+function loadTasksFromScriptTags() {
+    console.log("Loading tasks from script tags...");
+    
+    // Clear the current tasks array
+    tasks = [];
+    
+    // Collect tasks from each global variable set by the task files
+    if (typeof window.mathTasks !== 'undefined' && Array.isArray(window.mathTasks)) {
+        console.log(`Adding ${window.mathTasks.length} math tasks`);
+        tasks = tasks.concat(window.mathTasks);
+    }
+    
+    if (typeof window.cisp430Tasks !== 'undefined' && Array.isArray(window.cisp430Tasks)) {
+        console.log(`Adding ${window.cisp430Tasks.length} CISP 430 tasks`);
+        tasks = tasks.concat(window.cisp430Tasks);
+    }
+    
+    if (typeof window.ciss316Tasks !== 'undefined' && Array.isArray(window.ciss316Tasks)) {
+        console.log(`Adding ${window.ciss316Tasks.length} CISS 316 tasks`);
+        tasks = tasks.concat(window.ciss316Tasks);
+    }
+    
+    if (typeof window.cisc360Tasks !== 'undefined' && Array.isArray(window.cisc360Tasks)) {
+        console.log(`Adding ${window.cisc360Tasks.length} CISC 360 tasks`);
+        tasks = tasks.concat(window.cisc360Tasks);
+    }
+    
+    if (typeof window.miscTasks !== 'undefined' && Array.isArray(window.miscTasks)) {
+        console.log(`Adding ${window.miscTasks.length} misc tasks`);
+        tasks = tasks.concat(window.miscTasks);
+    }
+    
+    // For backward compatibility, also check the courseTasks variable
+    if (typeof window.courseTasks !== 'undefined' && Array.isArray(window.courseTasks)) {
+        console.log(`Adding ${window.courseTasks.length} course tasks from global variable`);
+        tasks = tasks.concat(window.courseTasks);
+    }
+    
+    console.log(`Total tasks loaded: ${tasks.length}`);
+    
+    // Check if we should fall back to localStorage
+    if (tasks.length === 0) {
+        console.log('No tasks loaded from script tags, checking localStorage');
         loadTasksFromLocalStorage();
-    }
-}
-
-// Function to extract tasks from a module text
-function extractTasksFromModule(moduleText) {
-    // Create a safe function to evaluate the module
-    const courseTasks = [];
-    
-    try {
-        // Create a temporary function to evaluate the module text
-        // This adds tasks to the courseTasks array
-        const extractFn = new Function('courseTasks', `
-            ${moduleText}
-            if (typeof courseTasks !== 'undefined') {
-                return courseTasks;
-            }
-        `);
-        
-        // Execute the function with the empty courseTasks array
-        const extractedTasks = extractFn(courseTasks);
-        
-        if (Array.isArray(extractedTasks) && extractedTasks.length > 0) {
-            return extractedTasks;
-        }
-    } catch (error) {
-        console.error('Error extracting tasks from module:', error);
+    } else {
+        // Save the loaded tasks to localStorage as a backup
+        saveTasksToLocalStorage();
     }
     
-    return courseTasks;
+    // Render the tasks
+    const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'All';
+    renderCategories();
+    renderTasks(activeCategory);
+    renderArchive();
+    displayNextTaskId();
 }
 
 // Function to save tasks to localStorage as a backup
@@ -680,8 +650,8 @@ function updateTimestamp() {
 
 // Initialize the application
 function init() {
-    // Load tasks from separate course files
-    loadTasksFromCourseFiles();
+    // Load tasks from script tags
+    loadTasksFromScriptTags();
     
     // Load notes from localStorage
     loadNotes();
@@ -763,7 +733,7 @@ function init() {
     
     // Set an interval to refresh tasks from course files periodically
     // This helps to ensure the latest tasks are loaded without caching issues
-    setInterval(loadTasksFromCourseFiles, 60000); // Refresh every minute
+    setInterval(loadTasksFromScriptTags, 60000); // Refresh every minute
 }
 
 // Run initialization when the page loads

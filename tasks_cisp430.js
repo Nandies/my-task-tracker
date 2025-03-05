@@ -1,5 +1,5 @@
 // CISP 430 course tasks
-const courseTasks = [
+window.cisp430Tasks = [
     {
         id: 5,
         title: "CISP 430: Assignment A3",

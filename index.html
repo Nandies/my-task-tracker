@@ -132,24 +132,12 @@
         </footer>
     </div>
 
-    <!-- Load task files with timestamp to prevent caching -->
-    <script>
-        // Function to add a script with anti-caching timestamp
-        function loadScript(src) {
-            const timestamp = new Date().getTime();
-            const script = document.createElement('script');
-            script.src = `${src}?t=${timestamp}`;
-            document.body.appendChild(script);
-        }
-        
-        // Load all required scripts with cache-busting timestamps
-        loadScript('tasks.js');
-        loadScript('tasks_math.js');
-        loadScript('tasks_cisp430.js');
-        loadScript('tasks_ciss316.js');
-        loadScript('tasks_cisc360.js');
-        loadScript('tasks_misc.js');
-        loadScript('app.js');
-    </script>
+    <!-- Load task files directly with script tags -->
+    <script src="tasks_math.js"></script>
+    <script src="tasks_cisp430.js"></script>
+    <script src="tasks_ciss316.js"></script>
+    <script src="tasks_cisc360.js"></script>
+    <script src="tasks_misc.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
