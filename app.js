@@ -3,6 +3,9 @@
 // The authorized Google email that can modify tasks
 const AUTHORIZED_EMAIL = 'nandies1019@gmail.com';
 
+// Global tasks array to store all tasks from different course files
+let tasks = [];
+
 // Function to format the date
 function formatDate(dateString) {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -30,6 +33,119 @@ function getRelativeTimeDescription(dateString) {
         return `<span class="due-soon">Due in ${diffDays} days</span>`;
     } else {
         return `Due in ${diffDays} days`;
+    }
+}
+
+// ------ TASK LOADING FUNCTIONALITY ------
+
+// Function to load tasks from separate course files
+async function loadTasksFromCourseFiles() {
+    try {
+        // Define the list of course files to load
+        const courseFiles = [
+            'tasks_math.js',
+            'tasks_cisp430.js',
+            'tasks_ciss316.js',
+            'tasks_cisc360.js',
+            'tasks_misc.js'
+        ];
+        
+        // Clear the current tasks array
+        tasks = [];
+        
+        // Load each course file
+        for (const file of courseFiles) {
+            try {
+                // Append a timestamp query parameter to prevent caching
+                const timestamp = new Date().getTime();
+                const response = await fetch(`${file}?t=${timestamp}`);
+                
+                if (response.ok) {
+                    const moduleText = await response.text();
+                    
+                    // Create a safe execution environment for the loaded JS
+                    const courseTasks = extractTasksFromModule(moduleText);
+                    
+                    // Add the course tasks to the main tasks array
+                    tasks = tasks.concat(courseTasks);
+                } else {
+                    console.warn(`Failed to load ${file}: ${response.status} ${response.statusText}`);
+                }
+            } catch (courseError) {
+                console.error(`Error loading ${file}:`, courseError);
+            }
+        }
+        
+        // Check if we should fall back to localStorage
+        if (tasks.length === 0) {
+            console.log('No tasks loaded from course files, checking localStorage');
+            loadTasksFromLocalStorage();
+        } else {
+            // Save the loaded tasks to localStorage as a backup
+            saveTasksToLocalStorage();
+        }
+        
+        // Render the tasks
+        const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'All';
+        renderCategories();
+        renderTasks(activeCategory);
+        renderArchive();
+    } catch (error) {
+        console.error('Error loading tasks from course files:', error);
+        // Fall back to localStorage
+        loadTasksFromLocalStorage();
+    }
+}
+
+// Function to extract tasks from a module text
+function extractTasksFromModule(moduleText) {
+    // Create a safe function to evaluate the module
+    const courseTasks = [];
+    
+    try {
+        // Create a temporary function to evaluate the module text
+        // This adds tasks to the courseTasks array
+        const extractFn = new Function('courseTasks', `
+            ${moduleText}
+            if (typeof courseTasks !== 'undefined') {
+                return courseTasks;
+            }
+        `);
+        
+        // Execute the function with the empty courseTasks array
+        const extractedTasks = extractFn(courseTasks);
+        
+        if (Array.isArray(extractedTasks) && extractedTasks.length > 0) {
+            return extractedTasks;
+        }
+    } catch (error) {
+        console.error('Error extracting tasks from module:', error);
+    }
+    
+    return courseTasks;
+}
+
+// Function to save tasks to localStorage as a backup
+function saveTasksToLocalStorage() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem('tasks_last_updated', new Date().toISOString());
+}
+
+// Function to load tasks from localStorage (as a fallback)
+function loadTasksFromLocalStorage() {
+    const savedTasks = localStorage.getItem('tasks');
+    if (savedTasks) {
+        try {
+            // Parse the saved tasks and update our tasks array
+            const parsedTasks = JSON.parse(savedTasks);
+            
+            // Replace the tasks array content
+            tasks = parsedTasks;
+            
+            console.log(`Loaded ${tasks.length} tasks from localStorage`);
+        } catch (error) {
+            console.error('Error parsing tasks from localStorage:', error);
+        }
     }
 }
 
@@ -360,21 +476,22 @@ function renderCategories() {
     });
 }
 
-// Function to save tasks to localStorage
-function saveTasks() {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-// Function to load tasks from localStorage
-function loadTasks() {
-    const savedTasks = localStorage.getItem('tasks');
-    if (savedTasks) {
-        // Parse the saved tasks and update our tasks array
-        const parsedTasks = JSON.parse(savedTasks);
+// Function to toggle task completion
+function toggleTaskCompletion(taskId) {
+    // Find the task by ID
+    const task = tasks.find(t => t.id === parseInt(taskId));
+    
+    if (task) {
+        // Toggle the status
+        task.status = task.status === 'completed' ? 'pending' : 'completed';
         
-        // Replace the tasks array content while preserving the reference
-        tasks.length = 0;
-        parsedTasks.forEach(task => tasks.push(task));
+        // Save to localStorage
+        saveTasksToLocalStorage();
+        
+        // Refresh the task display
+        const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+        renderTasks(activeCategory);
+        renderArchive();
     }
 }
 
@@ -395,25 +512,6 @@ function toggleArchive() {
     
     // Save preference to localStorage
     localStorage.setItem('archiveVisible', !archiveSection.classList.contains('hidden'));
-}
-
-// Function to toggle task completion
-function toggleTaskCompletion(taskId) {
-    // Find the task by ID
-    const task = tasks.find(t => t.id === parseInt(taskId));
-    
-    if (task) {
-        // Toggle the status
-        task.status = task.status === 'completed' ? 'pending' : 'completed';
-        
-        // Save to localStorage
-        saveTasks();
-        
-        // Refresh the task display
-        const activeCategory = document.querySelector('.category-btn.active').dataset.category;
-        renderTasks(activeCategory);
-        renderArchive();
-    }
 }
 
 // Function to render tasks
@@ -559,8 +657,8 @@ function updateTimestamp() {
 
 // Initialize the application
 function init() {
-    // Load tasks from localStorage
-    loadTasks();
+    // Load tasks from separate course files
+    loadTasksFromCourseFiles();
     
     // Load notes from localStorage
     loadNotes();
@@ -634,13 +732,15 @@ function init() {
         signOutButton.addEventListener('click', logoutFromGoogle);
     }
     
-    // Render the UI
-    renderCategories();
-    renderTasks();
-    renderArchive();
-    renderNotes();
+    // Update auth UI
     updateAuthUI();
+    
+    // Update timestamp
     updateTimestamp();
+    
+    // Set an interval to refresh tasks from course files periodically
+    // This helps to ensure the latest tasks are loaded without caching issues
+    setInterval(loadTasksFromCourseFiles, 60000); // Refresh every minute
 }
 
 // Run initialization when the page loads

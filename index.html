@@ -28,6 +28,10 @@
             background-color: #3367D6;
         }
     </style>
+    <!-- Meta tag to prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 </head>
 <body>
     <div class="container">
@@ -87,7 +91,7 @@
         <main>
             <h2 class="section-title">Active Tasks</h2>
             <div class="task-container">
-                <!-- Tasks will be loaded here from tasks.js -->
+                <!-- Tasks will be loaded dynamically -->
             </div>
             
             <div class="archive-toggle-container">
@@ -99,7 +103,7 @@
             <div id="archive-section" class="archive-section hidden">
                 <h2 class="section-title">Completed Tasks</h2>
                 <div class="archive-container">
-                    <!-- Completed tasks will be loaded here -->
+                    <!-- Completed tasks will be loaded dynamically -->
                 </div>
             </div>
         </main>
@@ -108,7 +112,25 @@
             <p>Last updated: <span id="last-updated"></span></p>
         </footer>
     </div>
-    <script src="tasks.js"></script>
-    <script src="app.js"></script>
+
+    <!-- Load task files with timestamp to prevent caching -->
+    <script>
+        // Function to add a script with anti-caching timestamp
+        function loadScript(src) {
+            const timestamp = new Date().getTime();
+            const script = document.createElement('script');
+            script.src = `${src}?t=${timestamp}`;
+            document.body.appendChild(script);
+        }
+        
+        // Load all required scripts with cache-busting timestamps
+        loadScript('tasks.js');
+        loadScript('tasks_math.js');
+        loadScript('tasks_cisp430.js');
+        loadScript('tasks_ciss316.js');
+        loadScript('tasks_cisc360.js');
+        loadScript('tasks_misc.js');
+        loadScript('app.js');
+    </script>
 </body>
 </html>
