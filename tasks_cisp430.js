@@ -7,7 +7,7 @@ window.cisp430Tasks = [
         priority: "high",
         deadline: "2025-03-08",
         category: "CISP 430",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 6,
@@ -16,7 +16,7 @@ window.cisp430Tasks = [
         priority: "high",
         deadline: "2025-03-08",
         category: "CISP 430",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 23,
@@ -33,6 +33,15 @@ window.cisp430Tasks = [
         description: "Complete and submit quiz Q4",
         priority: "high",
         deadline: "2025-03-22",
+        category: "CISP 430",
+        status: "pending"
+    },
+    {
+        id: 25,
+        title: "CISP 430: Chapter 7 Discussions",
+        description: "Complete all 4 discussions before 23:59",
+        priority: "high",
+        deadline: "2025-03-08",
         category: "CISP 430",
         status: "pending"
     }
