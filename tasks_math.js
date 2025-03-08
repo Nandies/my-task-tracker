@@ -34,7 +34,7 @@ window.mathTasks = [
         priority: "medium",
         deadline: "2025-03-06",
         category: "Math",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 17,
