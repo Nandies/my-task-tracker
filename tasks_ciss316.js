@@ -31,7 +31,25 @@ window.ciss316Tasks = [
         title: "CISS 316: Do Lab 7 Projects",
         description: "Complete 4 activies",
         priority: "high",
+        deadline: "2025-03-14",
+        category: "CISS 316",
+        status: "pending"
+    },
+    {
+        id: 26,
+        title: "CISS 316: Final Lab Activities",
+        description: "Complete Lab Activities",
+        priority: "high",
         deadline: "2025-03-12",
+        category: "CISS 316",
+        status: "pending"
+    },
+    {
+        id: 27,
+        title: "CISS 316: Final Exam",
+        description: "Complete Final Exam",
+        priority: "high",
+        deadline: "2025-03-14",
         category: "CISS 316",
         status: "pending"
     },
