@@ -43,6 +43,6 @@ window.cisp430Tasks = [
         priority: "high",
         deadline: "2025-03-08",
         category: "CISP 430",
-        status: "pending"
+        status: "completed"
     }
 ];
