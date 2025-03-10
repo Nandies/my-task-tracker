@@ -44,5 +44,14 @@ window.miscTasks = [
         deadline: "2025-03-30",
         category: "Misc",
         status: "pending"
+    },
+    {
+        id: 16,
+        title: "Learn rust on free time",
+        description: "Currently on: **** task",
+        priority: "high",
+        deadline: "2025-03-30",
+        category: "Misc",
+        status: "pending"
     }
 ];
