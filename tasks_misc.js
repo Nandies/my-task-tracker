@@ -46,7 +46,7 @@ window.miscTasks = [
         status: "pending"
     },
     {
-        id: 16,
+        id: 28,
         title: "Learn rust on free time",
         description: "Currently on: **** task",
         priority: "high",
