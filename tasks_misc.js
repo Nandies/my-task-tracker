@@ -48,7 +48,7 @@ window.miscTasks = [
     {
         id: 28,
         title: "Learn rust on free time",
-        description: "Currently on: **** task",
+        description: "Currently on: Chapter 3",
         priority: "high",
         deadline: "2025-03-30",
         category: "Misc",
