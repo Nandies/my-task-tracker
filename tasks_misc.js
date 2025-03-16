@@ -62,7 +62,7 @@ window.miscTasks = [
         deadline: "2025-03-29",
         category: "Misc",
         status: "pending"
-    }
+    },
     {
         id: 30,
         title: "Cyber Security Zoom meet 4pm check email for link",
