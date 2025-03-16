@@ -53,5 +53,23 @@ window.miscTasks = [
         deadline: "2025-03-30",
         category: "Misc",
         status: "pending"
+    },
+    {
+        id: 29,
+        title: "Cyber Security Comp on the 29th",
+        description: "CRC Cyber Security Competition on the 29th",
+        priority: "high",
+        deadline: "2025-03-29",
+        category: "Misc",
+        status: "pending"
+    }
+    {
+        id: 30,
+        title: "Cyber Security Zoom meet 4pm check email for link",
+        description: "Cyber Security Zoom meet 4pm check email for link",
+        priority: "high",
+        deadline: "2025-03-16",
+        category: "Misc",
+        status: "pending"
     }
 ];

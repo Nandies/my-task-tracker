@@ -13,7 +13,7 @@ window.cisc360Tasks = [
         title: "CISC 360: Saturday Class",
         description: "Attend Saturday class session",
         priority: "high",
-        deadline: "2025-03-15",
+        deadline: "2025-03-29",
         category: "CISC 360",
         status: "pending"
     },
