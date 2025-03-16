@@ -43,7 +43,7 @@ window.mathTasks = [
         priority: "high",
         deadline: "2025-03-11",
         category: "Math",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 18,
@@ -52,7 +52,7 @@ window.mathTasks = [
         priority: "high",
         deadline: "2025-03-11",
         category: "Math",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 19,
@@ -61,6 +61,6 @@ window.mathTasks = [
         priority: "high",
         deadline: "2025-03-11",
         category: "Math",
-        status: "pending"
+        status: "completed"
     }
 ];

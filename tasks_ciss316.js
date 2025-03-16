@@ -33,7 +33,7 @@ window.ciss316Tasks = [
         priority: "high",
         deadline: "2025-03-14",
         category: "CISS 316",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 26,
@@ -42,7 +42,7 @@ window.ciss316Tasks = [
         priority: "high",
         deadline: "2025-03-12",
         category: "CISS 316",
-        status: "pending"
+        status: "completed"
     },
     {
         id: 27,
@@ -51,6 +51,6 @@ window.ciss316Tasks = [
         priority: "high",
         deadline: "2025-03-14",
         category: "CISS 316",
-        status: "pending"
+        status: "completed"
     },
     ];
